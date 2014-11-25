@@ -17,22 +17,24 @@ class TaaS
 
     if posted_services.includes?(service)
       pick_service
+    else
+      service
     end
   end
 
-  #updates status
-  def new_tweet
+  def create_new_tweet
     @service = pick_service
     check_if_already_posted(@service)
-    @client.update("#{@to_be_tweeted.text}")
+    @tweet = "#{@service} as a Service"
   end
 
-
+  # need to figure out the param in here, what do i need to make this go
   def and_go!(secondlist, last_thought, target)
     if wakey_wakey
-      @tweet = new_tweet
+      create_new_tweet
+      @client.update("#{@tweet}")
+      update_posted_services(@tweet)
     end
-    update_posted_services(@tweet)
   end
 
   # TaaS will not tweet if it is between midnight and 8 am on her remote server
@@ -54,7 +56,7 @@ class TaaS
   #updates the last tweet
   def update_posted_services(tweet)
     open(posted_services, 'r+') { |f|
-      f.puts "#{@tweet.id}"
+      f.puts "#{@tweet}"
     }
   end
 end
