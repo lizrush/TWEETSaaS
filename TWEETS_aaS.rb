@@ -1,37 +1,60 @@
-#!/usr/bin/env ruby
+require 'twitter'
+require 'yaml'
 
-require 'rubygems'
-require 'chatterbot/dsl'
+class TaaS
 
-#
-# this is the script for the twitter bot TWEETS_aaS
-# generated on 2014-11-24 16:23:24 -0800
-#
+  def initialize(config_file, services, tweet)
+    @client    = create_twitter_client(YAML.load_file(config_file))
+    @services  = File.read(services).split("\n")
+  end
 
-consumer_key 'YvehPW9QhuF0mrP2T0OpvQxqP'
-consumer_secret 'GM6DKY6X2qTQm0K3oWGYsz7tRPiCRyrdDhP87X7k0YpOIRsbiT'
+  def pick_service
+    @services.sample
+  end
 
-secret 'ECu3uP6dd3HobPyitbyDQ49GmPYSqP38s61SHzIMB3gEO'
-token '2909447275-SuZ8ya78XrtLWcpNgalRJmvGoRUln7J9Qzw6PgE'
+  def check_if_already_posted(service)
+    posted_services = File.read(posted_services).strip
 
-# remove this to send out tweets
-debug_mode
+    if posted_services.includes?(service)
+      pick_service
+    end
+  end
 
-# remove this to update the db
-no_update
-# remove this to get less output when running
-verbose
+  #updates status
+  def new_tweet
+    @service = pick_service
+    check_if_already_posted(@service)
+    @client.update("#{@to_be_tweeted.text}")
+  end
 
-# here's a list of users to ignore
-blacklist "abc", "def"
 
-# here's a list of things to exclude from searches
-exclude "hi", "spammer", "junk"
+  def and_go!(secondlist, last_thought, target)
+    if wakey_wakey
+      @tweet = new_tweet
+    end
+    update_posted_services(@tweet)
+  end
 
-search "keyword" do |tweet|
- reply "Hey #USER# nice to meet you!", tweet
-end
+  # TaaS will not tweet if it is between midnight and 8 am on her remote server
+  def wakey_wakey
+    Time.now.strftime('%k').to_i <= 8 || Time.now.strftime('%k').to_i >= 16
+  end
 
-replies do |tweet|
-  reply "Yes #USER#, you are very kind to say that!", tweet
+  private
+
+  def create_twitter_client(config_hash)
+    Twitter::REST::Client.new do |config|
+      config.consumer_key        = config_hash['consumer_key']
+      config.consumer_secret     = config_hash['consumer_secret']
+      config.access_token        = config_hash['access_token']
+      config.access_token_secret = config_hash['access_token_secret']
+    end
+  end
+
+  #updates the last tweet
+  def update_posted_services(tweet)
+    open(posted_services, 'r+') { |f|
+      f.puts "#{@tweet.id}"
+    }
+  end
 end
