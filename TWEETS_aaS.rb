@@ -3,17 +3,20 @@ require 'yaml'
 
 class TaaS
 
-  def initialize(config_file, services, tweet)
+  def initialize(config_file, services, posted_services)
     @client    = create_twitter_client(YAML.load_file(config_file))
     @services  = File.read(services).split("\n")
+    @posted_services = posted_services
   end
+
+  # check services & posted services to see if I need to tweet at self to ask for more topics
 
   def pick_service
     @services.sample
   end
 
   def check_if_already_posted(service)
-    posted_services = File.read(posted_services).strip
+    posted_services = File.read(@posted_services).split("\n")
 
     if posted_services.includes?(service)
       pick_service
@@ -28,18 +31,10 @@ class TaaS
     @tweet = "#{@service} as a Service"
   end
 
-  # need to figure out the param in here, what do i need to make this go
-  def and_go!(secondlist, last_thought, target)
-    if wakey_wakey
-      create_new_tweet
-      @client.update("#{@tweet}")
-      update_posted_services(@tweet)
-    end
-  end
-
-  # TaaS will not tweet if it is between midnight and 8 am on her remote server
-  def wakey_wakey
-    Time.now.strftime('%k').to_i <= 8 || Time.now.strftime('%k').to_i >= 16
+  def and_go!
+    create_new_tweet
+    @client.update("#{@tweet}")
+    update_posted_services
   end
 
   private
@@ -53,10 +48,9 @@ class TaaS
     end
   end
 
-  #updates the last tweet
-  def update_posted_services(tweet)
-    open(posted_services, 'r+') { |f|
-      f.puts "#{@tweet}"
+  def update_posted_services
+    open(@posted_services, 'a+') { |f|
+      f.puts "\n#{@service}"
     }
   end
 end

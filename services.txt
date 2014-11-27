@@ -22,7 +22,6 @@ Scandal
 Zig Zag
 Zootsuits
 Pasta
-Zippers
 Zest
 Selling Out
 Abundance
@@ -69,7 +68,6 @@ UTIs
 "My Account Was Hacked"
 Damage
 Small Potatoes
-Nanu Nanu
 Loud Typing
 Mansplaining
 Bitch Face
@@ -123,3 +121,6 @@ Human Nature
 Twitter Bots
 Erykah Badu
 Abacus Computing
+Office Chair Races
+Iatrogenisis
+
