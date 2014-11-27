@@ -28,7 +28,7 @@ class TaaS
   def create_new_tweet
     @service = pick_service
     check_if_already_posted(@service)
-    @tweet = "#{create_acronym(@service)}: #{@service} as a Service"
+    @tweet = "#{create_acronym(@service)}aaS: #{@service} as a Service"
   end
 
   def and_go!
