@@ -18,7 +18,7 @@ class TaaS
   def check_if_already_posted(service)
     posted_services = File.read(@posted_services).split("\n")
 
-    if posted_services.includes?(service)
+    if posted_services.include?(service)
       pick_service
     else
       service
@@ -28,7 +28,7 @@ class TaaS
   def create_new_tweet
     @service = pick_service
     check_if_already_posted(@service)
-    @tweet = "#{@service} as a Service"
+    @tweet = "#{create_acronym(@service)}: #{@service} as a Service"
   end
 
   def and_go!
@@ -48,9 +48,18 @@ class TaaS
     end
   end
 
+  def create_acronym(service)
+    words   = service.split
+    acronym = ""
+    words.each do |word|
+      acronym += word[0].upcase
+    end
+    acronym
+  end
+
   def update_posted_services
     open(@posted_services, 'a+') { |f|
-      f.puts "\n#{@service}"
+      f.puts "#{@service}"
     }
   end
 end
