@@ -6,28 +6,21 @@ class TaaS
   def initialize(config_file, services, posted_services)
     @client    = create_twitter_client(YAML.load_file(config_file))
     @services  = File.read(services).split("\n")
-    @posted_services = posted_services
+    @tweet_log = posted_services
+    @posted_services = File.read(posted_services).split("\n")
   end
 
-  # check services & posted services to see if I need to tweet at self to ask for more topics
-
   def pick_service
-    @services.sample
+    service = @services.sample
+    check_if_already_posted(service) ? pick_service : service
   end
 
   def check_if_already_posted(service)
-    posted_services = File.read(@posted_services).split("\n")
-
-    if posted_services.include?(service)
-      pick_service
-    else
-      service
-    end
+    @posted_services.include?(service)
   end
 
   def create_new_tweet
     @service = pick_service
-    check_if_already_posted(@service)
     @tweet = "#{create_acronym(@service)}aaS: #{@service} as a Service"
   end
 
@@ -58,7 +51,7 @@ class TaaS
   end
 
   def update_posted_services
-    open(@posted_services, 'a+') { |f|
+    open(@tweet_log, 'a+') { |f|
       f.puts "#{@service}"
     }
   end
